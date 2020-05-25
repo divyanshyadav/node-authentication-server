@@ -9,6 +9,14 @@ const { getUser } = require('./db')
 const app = express()
 const PORT = process.env.PORT || 8888
 
+
+function getJWTToken(user) {
+    return jwt.sign({
+        sub: user.id,
+        username: user.username
+    }, SECRET, { expiresIn: "3 hours" })
+}
+
 app.use(bodyParser.json())
 
 app.post('/login', [
@@ -21,22 +29,24 @@ app.post('/login', [
     const validationErrors = getValidationErrors(req)
 
     if (validationErrors) {
-        return res.status(422).json(validationErrors)
+        return res
+            .status(422)
+            .json(validationErrors)
     }
     
     const user = getUser(username, password)
 
     if (!user) {
-        res.status(401).send('User not found.')
-        return
+        return res
+            .status(401)
+            .send('User not found.')
     }
 
-    const token = jwt.sign({
-        sub: user.id,
-        username: user.username
-    }, SECRET, { expiresIn: "3 hours" })
-
-    res.status(200).send({ access_token: token })
+    res
+        .status(200)
+        .send({ 
+            access_token: getJWTToken(user) 
+        })
 })
 
 app.get('*', (req, res) => {
