@@ -1,7 +1,7 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 const jwt = require('jsonwebtoken')
-const { check } = require('express-validator');
+const { checkSchema } = require('express-validator');
 const { SECRET } = require('./constants')
 const { getValidationErrors } = require('./helper')
 const { getUser } = require('./db')
@@ -19,12 +19,20 @@ function getJWTToken(user) {
 
 app.use(bodyParser.json())
 
-app.post('/login', [
-    check('username')
-        .not().isEmpty().withMessage("can't be empty"),
-    check('password')
-        .not().isEmpty().withMessage("can't be empty")
-] ,(req, res) => {
+app.post('/login', checkSchema({
+    username: {
+        isEmpty: {
+            negated: true,
+            errorMessage: "required"
+        }
+    },
+    password: {
+        isEmpty: {
+            negated: true,
+            errorMessage: "required"
+        }
+    }
+}), (req, res) => {
     const { username, password } = req.body
     const validationErrors = getValidationErrors(req)
 
