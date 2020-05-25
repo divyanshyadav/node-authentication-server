@@ -7,12 +7,12 @@
 npm install
 ```
 
-## Start client server
+## Launch client server
 ```bash
 npm start
 ```
 
-## start auth server
+## Launch auth server
 ```bash
 npm run start:authServer
 ```
