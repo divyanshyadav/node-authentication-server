@@ -10,7 +10,7 @@ const app = express()
 const PORT = process.env.PORT || 8888
 
 
-function getJWTToken(user) {
+function generateJWTToken(user) {
     return jwt.sign({
         sub: user.id,
         username: user.username
@@ -53,7 +53,7 @@ app.post('/login', checkSchema({
     res
         .status(200)
         .send({ 
-            access_token: getJWTToken(user) 
+            access_token: generateJWTToken(user) 
         })
 })
 
