@@ -1,15 +1,14 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 const jwt = require('jsonwebtoken')
-const { checkSchema } = require('express-validator');
+const yup = require('yup');
 
 const { SECRET } = require('./constants')
-const { getValidationErrors } = require('./helper')
+const validate = require('./validate')
 const { getUser } = require('./db')
 
 const app = express()
 const PORT = process.env.PORT || 8888
-
 
 function generateJWTToken(user) {
     return jwt.sign({
@@ -20,29 +19,11 @@ function generateJWTToken(user) {
 
 app.use(bodyParser.json())
 
-app.post('/login', checkSchema({
-    username: {
-        isEmpty: {
-            negated: true,
-            errorMessage: "required"
-        }
-    },
-    password: {
-        isEmpty: {
-            negated: true,
-            errorMessage: "required"
-        }
-    }
+app.post('/login', validate({
+    username: yup.string().max(30).required(),
+    password: yup.string().max(30).required()
 }), (req, res) => {
     const { username, password } = req.body
-    const validationErrors = getValidationErrors(req)
-
-    if (validationErrors) {
-        return res
-            .status(422)
-            .json(validationErrors)
-    }
-    
     const user = getUser(username, password)
 
     if (!user) {
