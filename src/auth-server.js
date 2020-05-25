@@ -2,6 +2,7 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const jwt = require('jsonwebtoken')
 const { checkSchema } = require('express-validator');
+
 const { SECRET } = require('./constants')
 const { getValidationErrors } = require('./helper')
 const { getUser } = require('./db')
