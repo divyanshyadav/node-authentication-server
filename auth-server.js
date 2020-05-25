@@ -1,39 +1,40 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 const jwt = require('jsonwebtoken')
+const { check } = require('express-validator');
+const { SECRET } = require('./constants')
+const { getValidationErrors } = require('./helper')
+const { getUser } = require('./db')
 
 const app = express()
 const PORT = process.env.PORT || 8888
 
 app.use(bodyParser.json())
 
-const secret = 'my-super-secret-key'
-
-const users = [
-    { id: '1', username: 'admin', password: 'admin' },
-    { id: '2', username: 'ship', password: 'ship' }
-]
-
-app.post('/login', (req, res) => {
+app.post('/login', [
+    check('username')
+        .not().isEmpty().withMessage("can't be empty"),
+    check('password')
+        .not().isEmpty().withMessage("can't be empty")
+] ,(req, res) => {
     const { username, password } = req.body
+    const validationErrors = getValidationErrors(req)
 
-    if (!username || !password) {
-        res.status(400).send('Please provide username and password.')
-        return
+    if (validationErrors) {
+        return res.status(422).json(validationErrors)
     }
-
-    const user = users
-        .find(user => user.username === username && user.password === password)
+    
+    const user = getUser(username, password)
 
     if (!user) {
-        res.send(401).send('User not found.')
+        res.status(401).send('User not found.')
         return
     }
 
     const token = jwt.sign({
         sub: user.id,
         username: user.username
-    }, secret, { expiresIn: "3 hours" })
+    }, SECRET, { expiresIn: "3 hours" })
 
     res.status(200).send({ access_token: token })
 })
@@ -43,5 +44,5 @@ app.get('*', (req, res) => {
 })
 
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`)
+    console.log(`Auth server is running on  http://localhost:${PORT}`)
 })

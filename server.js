@@ -1,14 +1,14 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 const expressJwt = require('express-jwt')
+const { SECRET } = require('./constants')
 
 const app = express()
 const PORT = process.env.PORT || 8888
 
 app.use(bodyParser.json())
 
-const secret = 'my-super-secret-key'
-const jwtCheck = expressJwt({ secret })
+const jwtCheck = expressJwt({ secret: SECRET })
 
 app.get('/auth/secret', jwtCheck, (req, res) => {
     res.status(200).send('Your secret!!')
